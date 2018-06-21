@@ -1,2 +1,2 @@
 # FITP
-ios App for French In The Park
+App for French In The Park
