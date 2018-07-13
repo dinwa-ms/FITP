@@ -1,7 +1,19 @@
 import React from 'react';
-import { Alert, AppRegistry, Button, Text, View, WebView, Platform, ScrollView, StyleSheet } from 'react-native';
+import { Alert, AppRegistry, Button, Text, View, WebView, Platform, ScrollView, StyleSheet, 
+          FlatList, SectionList, TouchableHighlight } from 'react-native';
 import { ExpoLinksView } from '@expo/samples';
-import { Constants } from 'expo';
+import { Constants, Audio } from 'expo';
+import jsonData from '../assets/text/text.json';
+
+const words = jsonData.words;
+
+const wordpair = [{key: 'word', en: 'a bird'},
+                  {key: 'un escargot', en: 'a snail'},
+                  {key: 'un canard', en: 'a duck'},
+                  {key: 'un poisson', en: 'a fish'},
+                  {key: 'un elephant', en: 'an elephant'},
+                  {key: 'un guépard', en: 'a cheetah'},
+                  {key: 'un insecte', en: 'an insect'}];
 
 class VocabsScreen extends React.Component {
 
@@ -15,7 +27,7 @@ class VocabsScreen extends React.Component {
 
   render() {
     return (
-      <View style={styles.container}>
+      <View style={styles.button}>
         <Button
           title={this.props.title}
           onPress={()=>this._onPressText(this.props.en)}
@@ -28,27 +40,53 @@ class VocabsScreen extends React.Component {
 
 
 export default class LotsOfButtons extends React.Component {
+
+  constructor(props)
+    {
+      super(props);
+      this.audioPlayer = new Audio.Sound();
+    }
+
   render() {
+
     return (
-      <ScrollView>
-      <View style={{alignItems: 'center', justifyContent: 'center'}}>
-        <VocabsScreen style={{width: 50, height: 50}} title='un oiseau' en='a bird'/>
-        <VocabsScreen title='un escargot' en='a snail'/>
-        <VocabsScreen title='un canard' en='a duck'/>
-        <VocabsScreen title='un poisson' en='a fish'/>
-        <VocabsScreen title='un elephant' en='an elephant'/>
-        <VocabsScreen title='un guépard' en='a cheetah'/>
-        <VocabsScreen title='un insecte' en='an insect'/>
-        <VocabsScreen title='un koala' en='a koala'/>
-        <VocabsScreen title='un lezard' en='a lizard'/>
-        <VocabsScreen title='une grenoville' en='a frog'/>
-        <VocabsScreen title='une étoile de mer' en='a starfish'/>
-        <VocabsScreen title='un serpent' en='a snake'/>
-        <VocabsScreen title='un papillon' en='a butterfly'/>
-        <VocabsScreen title='un araignée' en='a spider'/>
+      <View style={styles.container}>
+        <SectionList
+          sections={[
+            {title: 'Lesson One', data: words},
+            {title: 'Lesson Two', data: words},
+          ]}
+          renderItem={({item}) => <VocabsScreen title={item.fr} en={item.en}/>}
+          renderSectionHeader={({section}) => 
+            <View style={styles.sectionHeader}>
+              <TouchableHighlight 
+                onPress={async () => {
+                  try {
+                    await this.audioPlayer.unloadAsync();
+                    await this.audioPlayer.loadAsync(require('../assets/audios/FoodSong.mp3'));
+                    await this.audioPlayer.playAsync(); 
+                  } catch(error) {
+                    console.error(error);
+                  }
+                }} 
+                onLongPress={async () => {
+                  try {
+                    await this.audioPlayer.unloadAsync();
+                  } catch(error) {
+                    console.error(error);
+                  }
+                }} >
+                <View style={styles.sectionHeader}>
+                  <Text>{section.title}</Text>
+                </View>
+              </TouchableHighlight>
+            </View>
+          }
+          keyExtractor={(item, index) => index}
+        />
 
       </View>
-      </ScrollView>
+
     );
   }
 }
@@ -56,12 +94,24 @@ export default class LotsOfButtons extends React.Component {
 
 
 const styles = StyleSheet.create({
+  mp3: {
+   paddingBottom: 10,
+  },
   container: {
-    flex: 0,
-    flexDirection: 'column',
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: '#d6d7da',
-    backgroundColor: '#d6d7da',
-  }
+   flex: 1,
+   flexDirection: 'column',
+  },
+  sectionHeader: {
+    paddingTop: 2,
+    paddingLeft: 10,
+    paddingRight: 10,
+    paddingBottom: 2,
+    backgroundColor: 'rgba(247,247,247,1.0)',
+  },
+  button: {
+    // flex: 0,
+    // flexDirection: 'column',
+    height: 50,
+    flexWrap: 'wrap',
+  },
 });
